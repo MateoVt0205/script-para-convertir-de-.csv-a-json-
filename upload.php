@@ -44,7 +44,7 @@ if (isset($_POST["submit"])) {
         }
     }
     else {
-        echo "El archivo subido no cumple con el formato .csv o  .xlsx";
+        echo "El archivo subido no cumple con el formato .csv o  .xlsx"; //ESto esta por que intente recibir el archivo excel y el formato no cumplia
     }
     }
     else {

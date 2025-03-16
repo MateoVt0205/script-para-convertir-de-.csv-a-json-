@@ -1,0 +1,2 @@
+Para usar el script debemos de crear una carpeta uplodas para recibir los archivos que el usuario suba.
+git

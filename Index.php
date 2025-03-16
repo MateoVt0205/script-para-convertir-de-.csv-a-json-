@@ -11,13 +11,13 @@
 </head>
 
 <body>
-    <h1 class="font-bold text-3xl flex justify-center">Prueba items</h1>
-    <div class="titulo mb-10 text-black font-bold">
+    <h1 class="font-bold text-3xl flex justify-center mb-10 ">Prueba items</h1>
+    <div class="titulo mb-10 text-black font-bold ml-7">
         <h3>Bienvenido aqui podras subir el archivo Excel que necesitas, recuerda tenerlo en un formato separado por comas (.csv).</h3>
     </div>
 
-    <div class="form ml-12">
-        <form action="upload.php" method="post" enctype="multipart/form-data" class="flex gap-5 margin-2 border-2 border-gray-200 p-5">
+    <div class="form ml-12 flex justify-center">
+        <form action="upload.php" method="post" enctype="multipart/form-data" class="flex gap-5 margin-2 w-150 border-2 border-gray-200 p-5">
             <div class="upload">
                 <input class="rounded-full bg-gray-200 text-gray-400 font-bold py-2 px-4" type="file" name="upload_file">
             </div>
