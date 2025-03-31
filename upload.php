@@ -25,17 +25,20 @@ if (isset($_POST["submit"])) {
 
             if(($handle = fopen($NewFullPath, "r")) !== FALSE) {
                 $dataArray = [];
-                $header = fgetcsv($handle, 1000, ","); //obtenemos los encabezados de la primera linea
+                $header = array_map('trim', fgetcsv($handle, 1000, ",")); //obtenemos los encabezados de la primera linea  usamos el trim para eliminar los espacios en blanco de las cabezaras
 
                 while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                    $dataArray[] = array_combine($header, $data);
+                    $dataArray[] = array_combine($header, array_map('trim', $data)); //Usamos el array_map y el trim para eliminar los espacios en blanco de los datos
                 }
                 fclose($handle);
                 //Hacemos la conversion del archivo .csv A json
-
                 $JsonData = json_encode($dataArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);  
+                //Usamos la función trim para eliminar los espacios en blanco
+                // $NewJsonData = trim($JsonData); 
+                $NewJson = rtrim($JsonData, " "); //Usamos la función rtrim para eliminar los espacios en blanco al final del archivo
                 //Hacemos un console.log para mirar la información del arreglo
-                echo "<pre>$JsonData</pre>";
+                echo "<pre>$NewJson</pre>";
+                // var_dump($NewJson);  //ESta es la respuesta del json sin espacios, pero no cumple con el formatko json
             }
             
         }
