@@ -8,7 +8,7 @@ La idea es usar el objeto (product(1)).json con el fin de usar los campos del ob
 
 Entonces la idea que tengo es la siguiente;
 $nombreProducto = "name" //Este name sera el el campo nombre del producto que excel del cliente nos dara
-o tambien puedo agregar un if y de esa manera de hacer una validación.
+o tambien puedo agregar un if y de esa manera de hacer una validación, ¿sera que tambine me dara haciendo un mapeo en las cabeceras?
 
 product.Json   |   headers.csv
 _______________|______________________
@@ -20,3 +20,7 @@ sku            | Sku
 quantity       | Cantidad
 category       | Categoria
 subcategory    | subcategoria
+
+
+
+##Podemos hacer (En caso de que no gusten los colores puedo cambiarlos sin ningun problema)
