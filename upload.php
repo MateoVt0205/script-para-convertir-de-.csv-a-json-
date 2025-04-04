@@ -1,56 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Cdn de tailwind -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Fin Cdn de tailwind -->
+</head>
+
 <?php
 if (isset($_POST["submit"])) {
-  
-    if (isset($_FILES["upload_file"]) && $_FILES["upload_file"]["error"] === UPLOAD_ERR_OK){ //Usamos el nombre del input como variable que guardara la información del archivo
 
-        //Agregamos la ruta temporal del archivo
+    if (isset($_FILES["upload_file"]) && $_FILES["upload_file"]["error"] === UPLOAD_ERR_OK) {
+
         $fileTempPath = $_FILES["upload_file"]["tmp_name"];
-        // echo $fileTempPath;
         $fileName = $_FILES["upload_file"]["name"];
-        $fileType = $_FILES["upload_file"]["type"];
-        $fileNameCmps = explode(".", $fileName); 
-        $fileExtension = strtolower(end($fileNameCmps)); //Esta función convertira las palabras en mayusculas que ingrese el usuario en minusculas 
-        
-        //podemos hacer una validación para solo recibir archoivos csv o xlsx (Formato separado por comas o un archivo excel)
-        // if($fileExtension === 'csv' || $fileExtension === 'xlsx'){
-        if($fileExtension === 'csv'){   
+        $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 
-            $uploadFileDir = "./uploads/"; 
-            $NewFullPath = $uploadFileDir . $fileName; //Creamos una variable que guardara la ruta de la carpeta Uploads y el nombre del archivo
+        if ($fileExtension === 'csv') {
+            $uploadFileDir = "./uploads/";
+            $NewFullPath = $uploadFileDir . $fileName;
 
-        if(move_uploaded_file($fileTempPath, $NewFullPath)){ //Usamos una función de php para mover el archivo de temporal a nuestra carpeta Uploads 
-            echo "El archivo se subio correctamente a la ruta $NewFullPath.<br>";
+            if (move_uploaded_file($fileTempPath, $NewFullPath)) {
+                echo "<p class='text-green-600 font-bold'>Archivo subido correctamente a $NewFullPath.</p>";
 
-            //Abrimso el archivo csv
+                if (($handle = fopen($NewFullPath, "r")) !== FALSE) {
+                    $dataArray = [];
+                    $csvHeaders = array_map('trim', fgetcsv($handle, 1000, ","));
 
-            if(($handle = fopen($NewFullPath, "r")) !== FALSE) {
-                $dataArray = [];
-                $header = array_map('trim', fgetcsv($handle, 1000, ",")); //obtenemos los encabezados de la primera linea  usamos el trim para eliminar los espacios en blanco de las cabezaras
+                    // Mapeo de cabecera: esto con el fin de que la información que el usuario ingrese el se asimile con los datos que necesita el woocomerce
+                    // y así no tener que cambiar el código cada vez que se cambie el nombre de la cabecera en el CSV
+                    $csvToBackendMap = [
+                        "SKU" => "sku",
+                        "Nombre Producto" => "name",
+                        "Descripción Producto" => "description",
+                        "Precio" => "price",
+                        "Precio Promoción" => "discountPrice",
+                        "Cantidad" => "quantity",
+                        "Categoría Principal" => "category",
+                        "Sub-Categoría" => "subcategory"
+                    ];
 
-                while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-                    $dataArray[] = array_combine($header, array_map('trim', $data)); //Usamos el array_map y el trim para eliminar los espacios en blanco de los datos
+                    $requiredHeaders = array_keys($csvToBackendMap);
+
+                    // Validamos los campos requeridos
+                    $missingHeaders = array_diff($requiredHeaders, $csvHeaders);
+                    if (!empty($missingHeaders)) {
+                        echo "<script>alert('Faltan columnas necesarias: " . implode(", ", $missingHeaders) . "');</script>";
+                        fclose($handle);
+                        exit();
+                    }
+
+                    while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+                        $rowAssoc = array_combine($csvHeaders, array_map('trim', $data));
+                        $backendFormattedRow = [];
+
+                        // Mapeamos cada campo del CSV al formato del wooccommerce
+                        foreach ($csvToBackendMap as $csvKey => $backendKey) {
+                            $backendFormattedRow[$backendKey] = $rowAssoc[$csvKey] ?? "";
+                        }
+
+                        $dataArray[] = $backendFormattedRow;
+                    }
+                    fclose($handle);
+
+                    // Guardamos en el JsonData el objeto que se va a enviar al woocommerce
+                    $JsonData = json_encode($dataArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                    echo "<pre class='bg-gray-900 text-green-400 p-4 rounded-md shadow-md'>$JsonData</pre>";
                 }
-                fclose($handle);
-                //Hacemos la conversion del archivo .csv A json
-                $JsonData = json_encode($dataArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);  
-                //Usamos la función trim para eliminar los espacios en blanco
-                // $NewJsonData = trim($JsonData); 
-                $NewJson = rtrim($JsonData, " "); //Usamos la función rtrim para eliminar los espacios en blanco al final del archivo
-                //Hacemos un console.log para mirar la información del arreglo
-                echo "<pre>$NewJson</pre>";
-                // var_dump($NewJson);  //ESta es la respuesta del json sin espacios, pero no cumple con el formatko json
+            } else {
+                echo "<p class='text-red-600 font-bold'>Error al mover el archivo de ubicación.</p>";
             }
-            
+        } else {
+            echo "<p class='text-red-600 font-bold'>El archivo debe tener extensión .csv</p>";
         }
-        else {
-            echo "Ocurrio un error al mover el archivo de ubicación";
-        }
-    }
-    else {
-        echo "El archivo subido no cumple con el formato .csv o  .xlsx"; //ESto esta por que intente recibir el archivo excel y el formato no cumplia
-    }
-    }
-    else {
-        echo "Hubo un error al subir el archivo . Código de error " . $_FILES["upload_file"]["error"];
+    } else {
+        echo "<p class='text-red-600 font-bold'>Error al subir el archivo. Código: " . $_FILES["upload_file"]["error"] . "</p>";
     }
 }

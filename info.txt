@@ -1,2 +1,22 @@
 Para usar el script debemos de crear una carpeta uplodas para recibir los archivos que el usuario suba.
 git
+ 
+
+
+La idea es usar el objeto (product(1)).json con el fin de usar los campos del objeto como cabeceras, eso con el fin de que el woocomerce interprete de manera correcta la información de que necesitamos y con el fin de que al cliente tambien le quede facil:
+- La idea que tengo es asignar variables con datos por defecto, por ejemplo asignaro
+
+Entonces la idea que tengo es la siguiente;
+$nombreProducto = "name" //Este name sera el el campo nombre del producto que excel del cliente nos dara
+o tambien puedo agregar un if y de esa manera de hacer una validación.
+
+product.Json   |   headers.csv
+_______________|______________________
+name           | Nombre producto      |  
+description    | Descripción producto |  
+price          | Precio producto    
+discountPrice  | Precio Promoción 
+sku            | Sku
+quantity       | Cantidad
+category       | Categoria
+subcategory    | subcategoria
